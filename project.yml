@@ -1,0 +1,19 @@
+name: CodexIOSStarter
+
+settings:
+  SWIFT_VERSION: 5.10
+
+targets:
+  CodexIOSStarter:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Sources
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.example.CodexIOSStarter
+      PRODUCT_NAME: CodexIOSStarter
+      GENERATE_INFOPLIST_FILE: YES
+      INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+      INFOPLIST_KEY_UILaunchScreen_Generation: YES
+      INFOPLIST_KEY_CFBundleDisplayName: CodexIOSStarter
