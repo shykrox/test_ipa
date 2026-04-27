@@ -1,0 +1,4 @@
+[submodule "VoidLink"]
+	path = VoidLink
+	url = https://github.com/shykrox/VoidLink-previously-moonlight-zwm.git
+	branch = Integration
