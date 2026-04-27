@@ -38,7 +38,6 @@ jobs:
             -target VoidLink \
             -configuration Release \
             -destination 'generic/platform=iOS' \
-            -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
@@ -47,8 +46,13 @@ jobs:
       - name: Package unsigned IPA and app
         run: |
           set -euo pipefail
-          APP_PATH="build/Build/Products/Release-iphoneos/VoidLink.app"
-          test -d "$APP_PATH"
+          DERIVED_DATA_ROOT="$HOME/Library/Developer/Xcode/DerivedData"
+          APP_PATH="$(find "$DERIVED_DATA_ROOT" -path '*/Build/Products/Release-iphoneos/VoidLink.app' -type d -print -quit 2>/dev/null || true)"
+
+          if [ -z "$APP_PATH" ]; then
+            echo "::error::VoidLink.app was not found under $DERIVED_DATA_ROOT"
+            exit 1
+          fi
 
           rm -rf build/Payload build/VoidLink-unsigned.ipa build/VoidLink.app.zip
           mkdir -p build/Payload
@@ -60,7 +64,7 @@ jobs:
           )
 
           (
-            cd build/Build/Products/Release-iphoneos
+            cd "$(dirname "$APP_PATH")"
             ditto -c -k --keepParent VoidLink.app "$GITHUB_WORKSPACE/build/VoidLink.app.zip"
           )
 
