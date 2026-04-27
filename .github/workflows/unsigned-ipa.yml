@@ -33,8 +33,10 @@ jobs:
       - name: List Xcode project schemes
         run: xcodebuild -list -project VoidLink/VoidLink.xcodeproj
 
-      - name: Clean Xcode derived data
-        run: rm -rf ~/Library/Developer/Xcode/DerivedData
+      - name: Clean Xcode derived data and package cache
+        run: |
+          rm -rf ~/Library/Developer/Xcode/DerivedData
+          rm -rf SourcePackages
 
       - name: Resolve Swift package dependencies
         run: |
@@ -59,12 +61,13 @@ jobs:
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
             -clonedSourcePackagesDirPath SourcePackages \
-            ENABLE_USER_SCRIPT_SANDBOXING=NO \
-            OTHER_CODE_SIGN_FLAGS="--generate-entitlement-der" \
+            -UseModernBuildSystem=YES \
+            clean build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            build
+            ENABLE_USER_SCRIPT_SANDBOXING=NO \
+            OTHER_CODE_SIGN_FLAGS="--generate-entitlement-der"
 
       - name: Package unsigned IPA and app
         run: |
