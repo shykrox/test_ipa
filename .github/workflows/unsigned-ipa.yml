@@ -39,11 +39,12 @@ jobs:
       - name: Resolve Swift package dependencies
         run: |
           set -euo pipefail
+          mkdir -p SourcePackages
           xcodebuild \
             -resolvePackageDependencies \
             -project VoidLink/VoidLink.xcodeproj \
             -scheme VoidLink \
-            -clonedSourcePackagesDirPath ./SourcePackages
+            -clonedSourcePackagesDirPath SourcePackages
 
       - name: Build VoidLink iOS app without signing
         env:
@@ -57,7 +58,7 @@ jobs:
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
-            -clonedSourcePackagesDirPath ./SourcePackages \
+            -clonedSourcePackagesDirPath SourcePackages \
             ENABLE_USER_SCRIPT_SANDBOXING=NO \
             OTHER_CODE_SIGN_FLAGS="--generate-entitlement-der" \
             CODE_SIGNING_ALLOWED=NO \
