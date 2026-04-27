@@ -30,13 +30,17 @@ jobs:
         with:
           submodules: recursive
 
+      - name: List Xcode project schemes
+        run: xcodebuild -list -project VoidLink/VoidLink.xcodeproj
+
       - name: Build VoidLink iOS app without signing
         run: |
           set -euo pipefail
           xcodebuild \
             -project VoidLink/VoidLink.xcodeproj \
-            -target VoidLink \
+            -scheme VoidLink \
             -configuration Release \
+            -sdk iphoneos \
             -destination 'generic/platform=iOS' \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
