@@ -33,6 +33,18 @@ jobs:
       - name: List Xcode project schemes
         run: xcodebuild -list -project VoidLink/VoidLink.xcodeproj
 
+      - name: Clean Xcode derived data
+        run: rm -rf ~/Library/Developer/Xcode/DerivedData
+
+      - name: Resolve Swift package dependencies
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -resolvePackageDependencies \
+            -project VoidLink/VoidLink.xcodeproj \
+            -scheme VoidLink \
+            -clonedSourcePackagesDirPath ./SourcePackages
+
       - name: Build VoidLink iOS app without signing
         run: |
           set -euo pipefail
@@ -42,6 +54,7 @@ jobs:
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
+            -clonedSourcePackagesDirPath ./SourcePackages \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
