@@ -1,27 +1,41 @@
-name: Unsigned IPA
+name: Build VoidLink unsigned IPA
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/unsigned-ipa.yml"
+      - ".gitmodules"
+      - "VoidLink"
+      - "VoidLink/**"
+  pull_request:
+    paths:
+      - ".github/workflows/unsigned-ipa.yml"
+      - ".gitmodules"
+      - "VoidLink"
+      - "VoidLink/**"
+
+permissions:
+  contents: read
 
 jobs:
   build-unsigned-ipa:
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
-      - name: Checkout
+      - name: Checkout repository and submodules
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
-      - name: Generate Xcode project
-        run: xcodegen generate
-
-      - name: Build iOS app without signing
+      - name: Build VoidLink iOS app without signing
         run: |
+          set -euo pipefail
           xcodebuild \
-            -project CodexIOSStarter.xcodeproj \
-            -scheme CodexIOSStarter \
+            -project VoidLink/VoidLink.xcodeproj \
+            -target VoidLink \
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -derivedDataPath build \
@@ -30,16 +44,31 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             build
 
-      - name: Package unsigned IPA
+      - name: Package unsigned IPA and app
         run: |
-          mkdir -p build/Payload
-          cp -R build/Build/Products/Release-iphoneos/CodexIOSStarter.app build/Payload/
-          cd build
-          zip -r CodexIOSStarter-unsigned.ipa Payload
+          set -euo pipefail
+          APP_PATH="build/Build/Products/Release-iphoneos/VoidLink.app"
+          test -d "$APP_PATH"
 
-      - name: Upload IPA artifact
+          rm -rf build/Payload build/VoidLink-unsigned.ipa build/VoidLink.app.zip
+          mkdir -p build/Payload
+          ditto "$APP_PATH" build/Payload/VoidLink.app
+
+          (
+            cd build
+            /usr/bin/zip -qry VoidLink-unsigned.ipa Payload
+          )
+
+          (
+            cd build/Build/Products/Release-iphoneos
+            ditto -c -k --keepParent VoidLink.app "$GITHUB_WORKSPACE/build/VoidLink.app.zip"
+          )
+
+      - name: Upload VoidLink artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: CodexIOSStarter-unsigned-ipa
-          path: build/CodexIOSStarter-unsigned.ipa
+          name: VoidLink-unsigned
+          path: |
+            build/VoidLink-unsigned.ipa
+            build/VoidLink.app.zip
           if-no-files-found: error
